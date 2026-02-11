@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { colors } from "../../data/colors";
 
 type WorkerRole = "worker" | "engineer" | "supervisor";
@@ -11,7 +11,7 @@ interface WorkerDef {
   status: WorkerStatus;
   efficiency: number;
   morale: number;
-  tenure: number; // rounds
+  tenure: number;
   salary: number;
   zone: string;
 }
@@ -23,7 +23,6 @@ interface WorkerState extends WorkerDef {
   targetY: number;
 }
 
-// Zone bounds in pixel coords for worker placement
 interface ZoneBounds {
   id: string;
   px: number; py: number;
@@ -41,10 +40,12 @@ const zoneBounds: ZoneBounds[] = [
   { id: "loading-dock", px: 10 * CELL + 20, py: 14 * CELL + 30, pw: 10 * CELL - 40, ph: 8 * CELL - 40 },
 ];
 
-const firstNames = ["Alex", "Jordan", "Sam", "Riley", "Casey", "Morgan", "Taylor", "Reese", "Quinn", "Blake",
+const firstNames = [
+  "Alex", "Jordan", "Sam", "Riley", "Casey", "Morgan", "Taylor", "Reese", "Quinn", "Blake",
   "Avery", "Drew", "Jamie", "Skyler", "Kai", "Finn", "Lee", "Pat", "Chris", "Robin",
   "Dana", "Lou", "Val", "Kim", "Jan", "Dev", "Ash", "Ray", "Sol", "Noor",
-  "Sage", "Reed", "Max", "Toni", "Erin", "Shay", "Rory", "Jude", "Wren", "Blair"];
+  "Sage", "Reed", "Max", "Toni", "Erin", "Shay", "Rory", "Jude", "Wren", "Blair",
+];
 
 function randInZone(zone: ZoneBounds) {
   return {
@@ -57,114 +58,114 @@ function createWorkers(): WorkerState[] {
   const workers: WorkerState[] = [];
   let nameIdx = 0;
 
-  // 28 workers on production floor
   for (let i = 0; i < 28; i++) {
-    const zone = zoneBounds[0]; // production
-    const isBreak = i >= 25; // 3 on break
+    const zone = zoneBounds[0];
+    const isBreak = i >= 25;
     const pos = isBreak ? randInZone(zoneBounds[4]) : randInZone(zone);
     workers.push({
-      id: `w${i}`,
-      name: firstNames[nameIdx++ % firstNames.length],
-      role: "worker",
-      status: isBreak ? "break" : "working",
+      id: `w${i}`, name: firstNames[nameIdx++ % firstNames.length],
+      role: "worker", status: isBreak ? "break" : "working",
       efficiency: 60 + Math.floor(Math.random() * 35),
       morale: 50 + Math.floor(Math.random() * 40),
-      tenure: 1 + Math.floor(Math.random() * 6),
-      salary: 45000,
+      tenure: 1 + Math.floor(Math.random() * 6), salary: 45000,
       zone: isBreak ? "breakroom" : "production",
-      x: pos.x, y: pos.y,
-      targetX: pos.x, targetY: pos.y,
+      x: pos.x, y: pos.y, targetX: pos.x, targetY: pos.y,
     });
   }
 
-  // 8 engineers in engineering + rd-lab
   for (let i = 0; i < 8; i++) {
-    const zoneIdx = i < 5 ? 1 : 2; // 5 engineering, 3 r&d
+    const zoneIdx = i < 5 ? 1 : 2;
     const zone = zoneBounds[zoneIdx];
     const pos = randInZone(zone);
     workers.push({
-      id: `e${i}`,
-      name: firstNames[nameIdx++ % firstNames.length],
-      role: "engineer",
-      status: "working",
+      id: `e${i}`, name: firstNames[nameIdx++ % firstNames.length],
+      role: "engineer", status: "working",
       efficiency: 70 + Math.floor(Math.random() * 25),
       morale: 55 + Math.floor(Math.random() * 35),
-      tenure: 1 + Math.floor(Math.random() * 8),
-      salary: 85000,
+      tenure: 1 + Math.floor(Math.random() * 8), salary: 85000,
       zone: zoneIdx === 1 ? "engineering" : "rd-lab",
-      x: pos.x, y: pos.y,
-      targetX: pos.x, targetY: pos.y,
+      x: pos.x, y: pos.y, targetX: pos.x, targetY: pos.y,
     });
   }
 
-  // 5 supervisors spread around
-  const supZones = [0, 0, 1, 5, 6]; // production x2, engineering, warehouse, dock
+  const supZones = [0, 0, 1, 5, 6];
   for (let i = 0; i < 5; i++) {
     const zone = zoneBounds[supZones[i]];
     const pos = randInZone(zone);
     workers.push({
-      id: `s${i}`,
-      name: firstNames[nameIdx++ % firstNames.length],
-      role: "supervisor",
-      status: "working",
+      id: `s${i}`, name: firstNames[nameIdx++ % firstNames.length],
+      role: "supervisor", status: "working",
       efficiency: 80 + Math.floor(Math.random() * 15),
       morale: 60 + Math.floor(Math.random() * 30),
-      tenure: 2 + Math.floor(Math.random() * 10),
-      salary: 75000,
+      tenure: 2 + Math.floor(Math.random() * 10), salary: 75000,
       zone: zoneBounds[supZones[i]].id,
-      x: pos.x, y: pos.y,
-      targetX: pos.x, targetY: pos.y,
+      x: pos.x, y: pos.y, targetX: pos.x, targetY: pos.y,
     });
   }
 
   return workers;
 }
 
+// Speed: pixels per second
+const WORKER_SPEED = 15;
+
 interface WorkersProps {
   cellSize: number;
   tick: number;
+  animTime: number;
 }
 
-export function Workers({ cellSize, tick }: WorkersProps) {
-  const [workers, setWorkers] = useState<WorkerState[]>(() => createWorkers());
+export function Workers({ cellSize, tick, animTime }: WorkersProps) {
+  const workersRef = useRef<WorkerState[]>(createWorkers());
+  const lastTimeRef = useRef(0);
+  const [, forceRender] = useState(0);
+  const renderTickRef = useRef(0);
+
   const [hovered, setHovered] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const prevTick = useRef(tick);
 
-  // Movement: each tick, chance to pick new target + lerp toward it
+  // Smooth movement via rAF delta time — mutate ref, render at ~30fps
   useEffect(() => {
-    if (tick === prevTick.current) return;
-    prevTick.current = tick;
+    if (lastTimeRef.current === 0) {
+      lastTimeRef.current = animTime;
+      return;
+    }
 
-    setWorkers((prev) =>
-      prev.map((w) => {
-        // 8% chance to pick new target within zone
-        let { targetX, targetY } = w;
-        if (Math.random() < 0.08) {
-          const zone = zoneBounds.find((z) => z.id === w.zone);
-          if (zone) {
-            const newPos = randInZone(zone);
-            targetX = newPos.x;
-            targetY = newPos.y;
-          }
+    const dt = Math.min((animTime - lastTimeRef.current) / 1000, 0.1); // seconds, capped
+    lastTimeRef.current = animTime;
+
+    const workers = workersRef.current;
+    for (let i = 0; i < workers.length; i++) {
+      const w = workers[i];
+
+      // Randomly pick new targets (~2% per frame at 60fps ≈ new target every ~0.8s)
+      if (Math.random() < 0.02) {
+        const zone = zoneBounds.find((z) => z.id === w.zone);
+        if (zone) {
+          const newPos = randInZone(zone);
+          w.targetX = newPos.x;
+          w.targetY = newPos.y;
         }
+      }
 
-        // Lerp toward target at 0.15 cells/tick
-        const dx = targetX - w.x;
-        const dy = targetY - w.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = 0.15 * cellSize;
-        let nx = w.x;
-        let ny = w.y;
-        if (dist > 1) {
-          nx = w.x + (dx / dist) * Math.min(speed, dist);
-          ny = w.y + (dy / dist) * Math.min(speed, dist);
-        }
+      // Move toward target
+      const dx = w.targetX - w.x;
+      const dy = w.targetY - w.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 0.5) {
+        const move = WORKER_SPEED * dt;
+        const step = Math.min(move, dist);
+        w.x += (dx / dist) * step;
+        w.y += (dy / dist) * step;
+      }
+    }
 
-        return { ...w, x: nx, y: ny, targetX, targetY };
-      })
-    );
-  }, [tick, cellSize]);
+    // Render at ~30fps to reduce React overhead (every other rAF)
+    renderTickRef.current++;
+    if (renderTickRef.current % 2 === 0) {
+      forceRender((v) => v + 1);
+    }
+  }, [animTime]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGGElement>) => {
     const svg = e.currentTarget.closest("svg");
@@ -176,6 +177,9 @@ export function Workers({ cellSize, tick }: WorkersProps) {
     setMousePos({ x: svgPt.x, y: svgPt.y });
   }, []);
 
+  const workers = workersRef.current;
+  const timeS = animTime / 1000;
+
   return (
     <g onMouseMove={handleMouseMove}>
       {workers.map((w) => {
@@ -184,8 +188,9 @@ export function Workers({ cellSize, tick }: WorkersProps) {
           : w.role === "engineer" ? colors.engineer
           : colors.supervisor;
 
-        // Vertical bob animation
-        const bobY = Math.sin(tick * 0.2 + w.id.charCodeAt(1) * 0.7) * 1.5;
+        // Smooth bob using continuous time
+        const bobPhase = w.id.charCodeAt(1) * 0.7 + (w.id.charCodeAt(0) || 0) * 0.3;
+        const bobY = Math.sin(timeS * 2.5 + bobPhase) * 1.5;
         const opacity = w.status === "break" ? 0.4 : 1;
         const scale = isHovered ? 1.3 : 1;
 
@@ -198,32 +203,21 @@ export function Workers({ cellSize, tick }: WorkersProps) {
             onMouseLeave={() => setHovered(null)}
             style={{ cursor: "pointer" }}
           >
-            {/* Hover glow */}
             {isHovered && (
               <circle cx={0} cy={0} r={12} fill={roleColor} opacity={0.15} />
             )}
-
-            {/* Head */}
             <circle cx={0} cy={-4} r={3.5} fill={roleColor} />
-
-            {/* Body */}
             {w.status === "break" ? (
-              // Sitting: body is horizontal
               <rect x={-5} y={0} width={10} height={4} rx={2} fill={roleColor} />
             ) : (
-              // Standing: body is vertical
               <rect x={-2.5} y={0} width={5} height={7} rx={2} fill={roleColor} />
             )}
-
-            {/* Supervisor clipboard */}
             {w.role === "supervisor" && (
               <g>
                 <rect x={4} y={-2} width={3} height={5} rx={0.5} fill="#8b7355" />
                 <rect x={4.5} y={-1} width={2} height={3} fill="#d4c4a8" />
               </g>
             )}
-
-            {/* Engineer wrench */}
             {w.role === "engineer" && (
               <g>
                 <line x1={4} y1={1} x2={7} y2={4} stroke="#7dd3a8" strokeWidth={1.5} strokeLinecap="round" />
@@ -234,7 +228,6 @@ export function Workers({ cellSize, tick }: WorkersProps) {
         );
       })}
 
-      {/* Tooltip */}
       {hovered && (
         <WorkerTooltip
           worker={workers.find((w) => w.id === hovered)!}
@@ -266,16 +259,7 @@ function WorkerTooltip({ worker, x, y }: { worker: WorkerState; x: number; y: nu
 
   return (
     <g pointerEvents="none">
-      <rect
-        x={tx} y={ty}
-        width={tw} height={th}
-        fill={colors.bgPanel}
-        stroke={roleColor}
-        strokeWidth={1}
-        rx={8}
-      />
-
-      {/* Name + role badge */}
+      <rect x={tx} y={ty} width={tw} height={th} fill={colors.bgPanel} stroke={roleColor} strokeWidth={1} rx={8} />
       <text x={tx + 12} y={ty + 20} fill={colors.textPrimary} fontSize={13} fontWeight={700}>
         {worker.name}
       </text>
@@ -283,8 +267,6 @@ function WorkerTooltip({ worker, x, y }: { worker: WorkerState; x: number; y: nu
       <text x={tx + 18 + worker.name.length * 8} y={ty + 21} fill={roleColor} fontSize={9} fontWeight={600} textTransform="uppercase">
         {worker.role}
       </text>
-
-      {/* Stats grid */}
       <StatRow label="Status" value={worker.status} color={worker.status === "working" ? colors.green : colors.textDim} y={ty + 40} tx={tx} tw={tw} />
       <StatRow label="Efficiency" value={`${worker.efficiency}%`} color={effColor} y={ty + 56} tx={tx} tw={tw} />
       <StatRow label="Morale" value={`${worker.morale}%`} color={moraleColor} y={ty + 72} tx={tx} tw={tw} />
