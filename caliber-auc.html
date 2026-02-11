@@ -1,0 +1,3772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caliber Business Simulation | AUC</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Variables */
+    :root {
+      --green: #00FF00;
+      --green-dim: rgba(0, 255, 0, 0.15);
+      --green-border: rgba(0, 255, 0, 0.3);
+      --dark-bg: #0a0a0a;
+      --dark-surface: #111111;
+      --dark-card: #161616;
+      --dark-border: #222222;
+      --text-primary: #ffffff;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'Space Grotesk', monospace;
+    }
+
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Base */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 18px;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Fixed full-page background image - disabled */
+    .page-background {
+      display: none;
+    }
+
+    /* Floating Particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--green);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.3;
+      }
+      90% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: translateY(-100px) translateX(100px);
+        opacity: 0;
+      }
+    }
+
+    /* Sections */
+    section {
+      position: relative;
+      z-index: 2;
+      padding: 100px 0;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* Section backgrounds */
+    .section-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.12;
+      background-size: cover;
+      background-position: center;
+      pointer-events: none;
+      filter: blur(2px);
+    }
+
+    /* Global flowing background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(0, 255, 0, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(0, 255, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 30% at 50% 90%, rgba(0, 255, 0, 0.025) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Typography - Larger sizes */
+    .label {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-serif);
+      font-weight: 500;
+    }
+
+    h1 {
+      font-size: clamp(48px, 7vw, 84px);
+      line-height: 1.1;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 30px;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 20px;
+      max-width: 700px;
+      line-height: 1.7;
+    }
+
+    /* Links */
+    .text-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 17px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--dark-border);
+      transition: all 0.2s ease;
+    }
+
+    .text-link:hover {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .text-link svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .text-link:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* Cards with flowing animations */
+    .card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 36px;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateY(0);
+    }
+
+    .card:hover {
+      border-color: var(--green-border);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 255, 0, 0.05);
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      margin-bottom: 24px;
+      color: var(--green);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover .card-icon {
+      border-color: var(--green-border);
+      background: rgba(0, 255, 0, 0.05);
+    }
+
+    .card-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 60px 0;
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .hero-text {
+      max-width: 560px;
+    }
+
+    .hero-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 40px;
+    }
+
+    .hero-preview {
+      position: relative;
+    }
+
+    .preview-frame {
+      background: var(--dark-surface);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--dark-card);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .preview-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .preview-dot.red { background: #ff5f57; }
+    .preview-dot.yellow { background: #febc2e; }
+    .preview-dot.green { background: #28c840; }
+
+    .preview-url {
+      flex: 1;
+      margin-left: 12px;
+      padding: 6px 12px;
+      background: var(--dark-bg);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .preview-content {
+      height: 400px;
+      display: flex;
+    }
+
+    .preview-sidebar {
+      width: 200px;
+      background: var(--dark-card);
+      border-right: 1px solid var(--dark-border);
+      padding: 16px;
+    }
+
+    .preview-sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: default;
+      transition: all 0.15s ease;
+    }
+
+    .preview-sidebar-item.active {
+      background: rgba(0, 255, 0, 0.1);
+      color: var(--green);
+    }
+
+    .preview-sidebar-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .preview-main {
+      flex: 1;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Gap Section */
+    .gap-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-top: 60px;
+    }
+
+    .gap-column h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .gap-column h3 svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+    }
+
+    .gap-column.right h3 svg {
+      color: var(--green);
+    }
+
+    .gap-list {
+      list-style: none;
+    }
+
+    .gap-list li {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--dark-border);
+      color: var(--text-secondary);
+      font-size: 17px;
+      transition: all 0.3s ease;
+    }
+
+    .gap-list li:hover {
+      padding-left: 12px;
+      color: var(--text-primary);
+    }
+
+    .gap-column.right .gap-list li {
+      color: var(--text-primary);
+    }
+
+    .gap-tagline {
+      margin-top: 70px;
+      text-align: center;
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Platform Section - Feature List Style */
+    .platform-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 70px;
+    }
+
+    .platform-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .platform-feature:first-child {
+      border-top: 1px solid var(--dark-border);
+    }
+
+    .platform-feature:hover {
+      background: linear-gradient(to right, rgba(0, 255, 0, 0.03), transparent);
+    }
+
+    .platform-feature-icon {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--green-border);
+      border-radius: 12px;
+      background: var(--dark-surface);
+    }
+
+    .platform-feature-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--green);
+    }
+
+    .platform-feature-content {
+      flex: 1;
+    }
+
+    .platform-feature-content h3 {
+      font-family: var(--font-sans);
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .platform-feature-content p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+    }
+
+    /* Curriculum Section */
+    .curriculum-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      margin-top: 70px;
+    }
+
+    @media (max-width: 900px) {
+      .curriculum-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .curriculum-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      min-height: 220px;
+    }
+
+    .curriculum-card .card-summary {
+      transition: opacity 0.3s ease;
+    }
+
+    .curriculum-card .card-expanded {
+      display: none;
+      opacity: 0;
+    }
+
+    .curriculum-card .card-expanded h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--green);
+    }
+
+    .curriculum-card .card-expanded ul {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+
+    .curriculum-card .card-expanded li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--dark-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .curriculum-card .card-expanded li:last-child {
+      border-bottom: none;
+    }
+
+    .curriculum-card .card-expanded li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .curriculum-card .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--dark-border);
+      border-radius: 50%;
+      background: var(--dark-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .curriculum-card .close-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Expanded state */
+    .curriculum-grid.has-expanded {
+      display: block;
+    }
+
+    .curriculum-grid.has-expanded .curriculum-card {
+      display: none;
+    }
+
+    .curriculum-grid.has-expanded .curriculum-card.expanded {
+      display: block;
+      grid-column: 1 / -1;
+      min-height: 400px;
+      animation: expandCard 0.4s ease forwards;
+    }
+
+    .curriculum-card.expanded .card-summary {
+      display: none;
+    }
+
+    .curriculum-card.expanded .card-expanded {
+      display: block;
+      opacity: 1;
+      animation: fadeIn 0.3s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .curriculum-card.expanded .close-btn {
+      display: flex;
+    }
+
+    @keyframes expandCard {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .curriculum-card .expand-hint {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s ease;
+    }
+
+    .curriculum-card:hover .expand-hint {
+      color: var(--green);
+    }
+
+    .curriculum-card .expand-hint svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Flow Section - Flowchart Style */
+    .flowchart {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      margin-top: 70px;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-box {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 30px 28px;
+      min-width: 200px;
+      max-width: 240px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .flow-box:hover {
+      border-color: var(--green);
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.15);
+      transform: translateY(-3px);
+    }
+
+    .flow-box-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .flow-box-number {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .flow-box h4 {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    .flow-box p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: none;
+    }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      color: var(--green);
+    }
+
+    .flow-arrow svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .flow-repeat {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 40px;
+      gap: 16px;
+    }
+
+    .flow-repeat-line {
+      height: 2px;
+      flex: 1;
+      max-width: 200px;
+      background: linear-gradient(to right, transparent, var(--green-border), transparent);
+    }
+
+    .flow-repeat-text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 8px 20px;
+      border: 1px solid var(--green-border);
+      border-radius: 20px;
+      background: var(--dark-surface);
+    }
+
+    /* Demo Section */
+    .demo-section {
+      padding: 80px 0 120px;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .demo-browser {
+      background: var(--dark-surface);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    }
+
+    .demo-chrome {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      background: var(--dark-card);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .demo-url-bar {
+      flex: 1;
+      margin-left: 16px;
+      padding: 8px 16px;
+      background: var(--dark-bg);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .demo-layout {
+      display: flex;
+      height: 600px;
+    }
+
+    .demo-sidebar {
+      width: 220px;
+      background: var(--dark-card);
+      border-right: 1px solid var(--dark-border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .demo-sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .demo-game-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .demo-team-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .demo-team-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #3b82f6;
+    }
+
+    .demo-status-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .demo-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .demo-badge.green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+
+    .demo-badge.blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+    }
+
+    .demo-round {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .demo-nav {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .demo-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .demo-nav-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .demo-nav-item.active {
+      background: rgba(0, 255, 0, 0.08);
+      color: var(--green);
+      border-color: var(--green-border);
+    }
+
+    .demo-nav-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .demo-main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--dark-bg);
+    }
+
+    /* Demo Pages */
+    .demo-page {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .demo-page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .demo-page-header {
+      margin-bottom: 24px;
+    }
+
+    .demo-page-header h2 {
+      font-family: var(--font-sans);
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .demo-page-header p {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    .demo-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .demo-stat-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 8px;
+      padding: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .demo-stat-card:hover {
+      border-color: var(--green-border);
+      transform: translateY(-2px);
+    }
+
+    .demo-stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .demo-stat-value {
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .demo-stat-value.green { color: var(--green); }
+    .demo-stat-value.blue { color: #3b82f6; }
+    .demo-stat-value.orange { color: #f59e0b; }
+    .demo-stat-value.purple { color: #a855f7; }
+
+    .demo-stat-change {
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .demo-stat-change.positive { color: #22c55e; }
+    .demo-stat-change.negative { color: #ef4444; }
+
+    .demo-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--dark-border);
+      padding-bottom: 0;
+      overflow-x: auto;
+    }
+
+    .demo-tab {
+      padding: 12px 18px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .demo-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .demo-tab.active {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .demo-subtab-content {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .demo-subtab-content.active {
+      display: block;
+    }
+
+    .demo-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .demo-card:hover {
+      border-color: var(--green-border);
+    }
+
+    .demo-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .demo-card-header svg {
+      width: 22px;
+      height: 22px;
+      color: var(--green);
+    }
+
+    .demo-card-title {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .demo-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .demo-slider-label {
+      width: 130px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .demo-slider {
+      flex: 1;
+      height: 6px;
+      background: var(--dark-border);
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-slider-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+    }
+
+    .demo-slider-value {
+      width: 90px;
+      text-align: right;
+      font-size: 14px;
+      font-family: var(--font-mono);
+    }
+
+    .demo-progress {
+      height: 10px;
+      background: var(--dark-border);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .demo-progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--green), #22c55e);
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+
+    .demo-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .demo-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--dark-border);
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .demo-list-item:hover {
+      padding-left: 8px;
+      background: rgba(0, 255, 0, 0.02);
+    }
+
+    .demo-list-item:last-child {
+      border-bottom: none;
+    }
+
+    /* News Ticker */
+    .demo-ticker {
+      position: absolute;
+      bottom: 0;
+      left: 220px;
+      right: 0;
+      background: var(--dark-card);
+      border-top: 1px solid var(--dark-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo-ticker-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #ef4444;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .demo-ticker-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Differentiators Section - Editorial Style */
+    .diff-items {
+      margin-top: 70px;
+    }
+
+    .diff-item {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 40px;
+      padding: 50px 0;
+      border-bottom: 1px solid var(--dark-border);
+      align-items: start;
+    }
+
+    .diff-item:first-child {
+      border-top: 1px solid var(--dark-border);
+    }
+
+    .diff-item:hover {
+      background: linear-gradient(to right, rgba(0, 255, 0, 0.02), transparent 50%);
+    }
+
+    .diff-number {
+      font-family: var(--font-serif);
+      font-size: 72px;
+      font-weight: 400;
+      line-height: 1;
+      color: var(--dark-border);
+      transition: color 0.3s ease;
+    }
+
+    .diff-item:hover .diff-number {
+      color: var(--green);
+    }
+
+    .diff-content {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .diff-content h3 {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .diff-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 32px;
+    }
+
+    .diff-point {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 17px;
+      color: var(--text-secondary);
+    }
+
+    .diff-point::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      margin-top: 70px;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 24px 32px;
+      text-align: center;
+      border-bottom: 1px solid var(--dark-border);
+      transition: all 0.3s ease;
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      text-align: left;
+      width: 35%;
+    }
+
+    .comparison-table th {
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding-bottom: 20px;
+    }
+
+    .comparison-table th:last-child {
+      color: var(--green);
+      font-size: 15px;
+    }
+
+    .comparison-table td {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .comparison-table td:last-child {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .comparison-table tr {
+      transition: all 0.3s ease;
+    }
+
+    .comparison-table tbody tr:hover {
+      background: rgba(0, 255, 0, 0.03);
+    }
+
+    .comparison-table tbody tr:hover td {
+      padding: 28px 32px;
+    }
+
+    .comparison-table tbody tr:hover td:first-child {
+      padding-left: 40px;
+    }
+
+    .check {
+      color: var(--green);
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    .partial {
+      color: #f59e0b;
+      font-size: 17px;
+    }
+
+    .no {
+      color: #1a1a1a;
+      font-size: 17px;
+    }
+
+    /* Audience Benefits */
+    .audience-benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 60px;
+    }
+
+    .audience-benefit {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .benefit-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--green-border);
+      border-radius: 10px;
+      background: var(--dark-surface);
+    }
+
+    .benefit-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--green);
+    }
+
+    .benefit-text h4 {
+      font-family: var(--font-sans);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .benefit-text p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-width: none;
+    }
+
+    /* Curriculum Mapping Table */
+    .curriculum-table-container {
+      margin-top: 50px;
+      overflow-x: auto;
+    }
+
+    .curriculum-mapping-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .curriculum-mapping-table th {
+      text-align: left;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .curriculum-mapping-table td {
+      padding: 20px;
+      font-size: 16px;
+      border-bottom: 1px solid var(--dark-border);
+      vertical-align: top;
+    }
+
+    .curriculum-mapping-table td:first-child {
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 220px;
+    }
+
+    .curriculum-mapping-table td:last-child {
+      color: var(--text-secondary);
+    }
+
+    .curriculum-mapping-table tr:hover {
+      background: rgba(0, 255, 0, 0.02);
+    }
+
+    .curriculum-footer {
+      margin-top: 40px;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Delivery Options - Row Based */
+    .delivery-options {
+      margin-top: 60px;
+    }
+
+    .delivery-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 1fr 1fr;
+      gap: 40px;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--dark-border);
+      align-items: start;
+    }
+
+    .delivery-row:first-child {
+      border-top: 1px solid var(--dark-border);
+    }
+
+    .delivery-row:hover {
+      background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.03), transparent);
+    }
+
+    .delivery-name {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .delivery-tag {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--green);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .delivery-col {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .delivery-col-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+
+    .delivery-col p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      max-width: none;
+    }
+
+    /* Two Column */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-top: 60px;
+    }
+
+    .two-col h4 {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: var(--green);
+    }
+
+    .two-col ul {
+      list-style: none;
+    }
+
+    .two-col li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--dark-border);
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    /* Bio Section */
+    .bio-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 60px;
+      margin-top: 60px;
+    }
+
+    .bio-company p {
+      margin-bottom: 24px;
+    }
+
+    .bio-leader {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 8px;
+      padding: 32px;
+    }
+
+    .bio-leader-name {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .bio-leader-title {
+      font-size: 14px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .bio-leader ul {
+      list-style: none;
+    }
+
+    .bio-leader li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .bio-leader li::before {
+      content: '\2022';
+      color: var(--green);
+      margin-right: 10px;
+    }
+
+    .bio-tagline {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid var(--dark-border);
+      text-align: center;
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+      text-align: center;
+    }
+
+    .testimonials-intro {
+      color: var(--text-muted);
+      font-size: 18px;
+      margin-top: -10px;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 60px;
+    }
+
+    .testimonial {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
+
+    .testimonial:hover {
+      border-color: var(--green-border);
+      transform: translateY(-4px);
+    }
+
+    .testimonial-quote {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-style: italic;
+      color: var(--text-primary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .testimonial-author {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .author-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .author-company {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Close Section */
+    .close-section {
+      text-align: center;
+      padding: 120px 0;
+    }
+
+    .cta-headline {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      margin-bottom: 16px;
+    }
+
+    .cta-subtext {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 18px 56px;
+      background: var(--green);
+      border: none;
+      border-radius: 50px;
+      color: var(--dark-bg);
+      font-family: var(--font-sans);
+      font-size: 17px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 24px rgba(0, 255, 0, 0.3);
+    }
+
+    .cta-button:hover {
+      background: #00cc00;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 32px rgba(0, 255, 0, 0.4);
+    }
+
+    .tagline-final {
+      margin-top: 40px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+
+      .hero-preview {
+        order: -1;
+      }
+
+      .gap-grid,
+      .two-col,
+      .bio-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .diff-item {
+        grid-template-columns: 60px 1fr;
+        gap: 24px;
+        padding: 32px 0;
+      }
+
+      .diff-number {
+        font-size: 48px;
+      }
+
+      .diff-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .diff-content h3 {
+        font-size: 26px;
+      }
+
+      .platform-feature {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .delivery-row {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .delivery-name {
+        font-size: 22px;
+      }
+
+      .audience-benefits {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .cta-headline {
+        font-size: 32px;
+      }
+
+      .curriculum-mapping-table td:first-child {
+        width: auto;
+      }
+
+      .flowchart {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      .flow-box {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+        padding: 8px 0;
+      }
+
+      .demo-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .demo-layout {
+        height: auto;
+        flex-direction: column;
+      }
+
+      .demo-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--dark-border);
+      }
+
+      .demo-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: 4px;
+      }
+
+      .demo-nav-item {
+        white-space: nowrap;
+      }
+
+      .demo-main {
+        min-height: 500px;
+      }
+
+      .demo-ticker {
+        left: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      section {
+        padding: 60px 0;
+      }
+
+      .container {
+        padding: 0 20px;
+      }
+
+      .demo-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .curriculum-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-table {
+        font-size: 14px;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 16px 12px;
+      }
+
+      .comparison-table tbody tr:hover td {
+        padding: 18px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed Background -->
+  <div class="page-background"></div>
+
+  <!-- Floating Particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+        <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="label">Business Simulation</div>
+          <h1>The Flex Labs<br>Business Simulation</h1>
+          <p>A consulting-grade, multi-round business simulation where teams run a company, make strategic decisions, and compete in a shared market.</p>
+          <div class="hero-links">
+            <a href="#demo" class="text-link">
+              Experience the demo
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#platform" class="text-link">
+              How it works
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#close" class="text-link">
+              Request a demo
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="hero-preview">
+          <div class="preview-frame">
+            <div class="preview-header">
+              <div class="preview-dot red"></div>
+              <div class="preview-dot yellow"></div>
+              <div class="preview-dot green"></div>
+              <div class="preview-url">flexlabs.me/simulation</div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-sidebar">
+                <div class="preview-sidebar-item active">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  Overview
+                </div>
+                <div class="preview-sidebar-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7-6H4a2 2 0 0 0-2 2v16z"/><path d="M17 2v6h6"/></svg>
+                  Factory
+                </div>
+                <div class="preview-sidebar-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Finance
+                </div>
+                <div class="preview-sidebar-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  HR
+                </div>
+                <div class="preview-sidebar-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  Marketing
+                </div>
+                <div class="preview-sidebar-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                  R&D
+                </div>
+              </div>
+              <div class="preview-main" style="background: linear-gradient(135deg, #0a0a0a 0%, #111 100%); display: flex; flex-direction: column; gap: 12px; padding: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                  <div style="background: #161616; border: 1px solid #222; border-radius: 6px; padding: 12px;">
+                    <div style="font-size: 10px; color: #666;">Cash Balance</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #00ff00;">$245.8M</div>
+                  </div>
+                  <div style="background: #161616; border: 1px solid #222; border-radius: 6px; padding: 12px;">
+                    <div style="font-size: 10px; color: #666;">Revenue</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #3b82f6;">$89.2M</div>
+                  </div>
+                </div>
+                <div style="background: #161616; border: 1px solid #222; border-radius: 6px; padding: 12px; flex: 1;">
+                  <div style="font-size: 10px; color: #666; margin-bottom: 8px;">Market Share by Segment</div>
+                  <div style="display: flex; gap: 4px; height: 60px; align-items: flex-end;">
+                    <div style="flex: 1; background: #00ff00; height: 75%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #00ff00; height: 45%; border-radius: 2px; opacity: 0.8;"></div>
+                    <div style="flex: 1; background: #00ff00; height: 60%; border-radius: 2px; opacity: 0.6;"></div>
+                    <div style="flex: 1; background: #00ff00; height: 30%; border-radius: 2px; opacity: 0.4;"></div>
+                    <div style="flex: 1; background: #00ff00; height: 50%; border-radius: 2px; opacity: 0.5;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Gap Section -->
+  <section id="gap">
+        <div class="container">
+      <div class="label">The Gap</div>
+      <h2>Why Simulations,<br>Not Slides</h2>
+
+      <div class="gap-grid">
+        <div class="gap-column">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Traditional Learning
+          </h3>
+          <ul class="gap-list">
+            <li>Teaching strategy</li>
+            <li>Case studies</li>
+            <li>Passive learning</li>
+            <li>No consequences</li>
+          </ul>
+        </div>
+        <div class="gap-column right">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Simulation-Based Learning
+          </h3>
+          <ul class="gap-list">
+            <li>Practicing strategy</li>
+            <li>Real-time decisions</li>
+            <li>Active competition</li>
+            <li>Visible outcomes</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="gap-tagline">"Learning shifts from explanation to experience."</p>
+    </div>
+  </section>
+
+  <!-- Platform Section -->
+  <section id="platform">
+        <div class="container">
+      <div class="label">The Platform</div>
+      <h2>One Platform.<br>Full Business Curriculum.</h2>
+      <p>A single integrated environment covering strategy, finance, operations, HR, innovation, and marketing. Every choice has consequences.</p>
+
+      <div class="platform-features">
+        <div class="platform-feature">
+          <div class="platform-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="platform-feature-content">
+            <h3>Executive-Level Decision Making</h3>
+            <p>Teams own strategy, finance, operations, and people. Every decision has trade-offs and consequences that compound over time.</p>
+          </div>
+        </div>
+        <div class="platform-feature">
+          <div class="platform-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="platform-feature-content">
+            <h3>Real Business Cycles</h3>
+            <p>Decisions compound across multiple rounds. Short-term wins can create long-term problems. Strategy unfolds over time.</p>
+          </div>
+        </div>
+        <div class="platform-feature">
+          <div class="platform-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="platform-feature-content">
+            <h3>Consequence-Driven Learning</h3>
+            <p>Results are visible, mistakes matter, and recovery is possible. Teams learn by doing, not just by listening.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curriculum Section -->
+  <section id="curriculum">
+        <div class="container">
+      <div class="label">The Curriculum</div>
+      <h2>What Teams Manage</h2>
+
+      <div class="curriculum-grid" id="curriculumGrid">
+        <!-- Strategy & Leadership -->
+        <div class="card curriculum-card" data-module="strategy">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <h3>Strategy & Leadership</h3>
+            <p>Direction, alignment, competitive positioning</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Set company vision and strategic direction</li>
+              <li>Allocate resources across business units</li>
+              <li>Define competitive positioning by segment</li>
+              <li>Balance short-term profits vs long-term growth</li>
+              <li>Coordinate cross-functional decisions</li>
+              <li>Respond to market changes and competitor moves</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Finance & Capital -->
+        <div class="card curriculum-card" data-module="finance">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <h3>Finance & Capital</h3>
+            <p>Cash, debt, equity, risk management</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Manage cash flow and working capital</li>
+              <li>Raise capital through loans, bonds, or equity</li>
+              <li>Set dividend policy and shareholder returns</li>
+              <li>Hedge foreign exchange exposure</li>
+              <li>Monitor financial ratios and credit rating</li>
+              <li>Present proposals to the board of directors</li>
+              <li>Generate financial statements and reports</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Human Resources -->
+        <div class="card curriculum-card" data-module="hr">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3>Human Resources</h3>
+            <p>Hiring, training, productivity, morale</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Recruit workers, engineers, and supervisors</li>
+              <li>Choose recruitment tier (Basic, Premium, Executive)</li>
+              <li>Design training programs with fatigue management</li>
+              <li>Set compensation levels and salary structures</li>
+              <li>Configure benefits (health, retirement, PTO, stock options)</li>
+              <li>Monitor workforce morale and productivity</li>
+              <li>Manage turnover and retention strategies</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Innovation & R&D -->
+        <div class="card curriculum-card" data-module="rnd">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <h3>Innovation & R&D</h3>
+            <p>Product development, investment under uncertainty</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Develop new products for market segments</li>
+              <li>Set quality and feature targets</li>
+              <li>Invest in technology upgrades (Miniaturization, Battery, Display, AI)</li>
+              <li>Manage R&D budget allocation</li>
+              <li>File and maintain patents</li>
+              <li>Balance development speed vs product quality</li>
+              <li>Launch products at optimal timing</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Operations & Supply -->
+        <div class="card curriculum-card" data-module="operations">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7-6H4a2 2 0 0 0-2 2v16z"/><path d="M17 2v6h6"/></svg>
+            </div>
+            <h3>Operations & Supply</h3>
+            <p>Capacity, efficiency, logistics</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Invest in factory efficiency (workers, machinery, engineers)</li>
+              <li>Purchase upgrades (Six Sigma, Automation, Green Energy, Robotics)</li>
+              <li>Manage production capacity and utilization</li>
+              <li>Choose shipping methods (Sea, Air, Land, Rail)</li>
+              <li>Source materials from regional suppliers</li>
+              <li>Monitor defect rates and quality control</li>
+              <li>Reduce CO2 emissions and improve ESG score</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Marketing & Pricing -->
+        <div class="card curriculum-card" data-module="marketing">
+          <button class="close-btn" onclick="collapseCard(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="card-summary">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <h3>Marketing & Pricing</h3>
+            <p>Segmentation, pricing, brand, demand</p>
+            <div class="expand-hint">
+              Click to explore
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="card-expanded">
+            <h4>Key Decisions</h4>
+            <ul>
+              <li>Allocate advertising budget by channel (TV, Digital, Social, Print)</li>
+              <li>Target market segments (Budget, General, Enthusiast, Professional, Active)</li>
+              <li>Invest in brand building activities</li>
+              <li>Launch promotions (Discounts, Bundles, Loyalty programs)</li>
+              <li>Set product pricing strategy</li>
+              <li>Monitor brand awareness and customer satisfaction</li>
+              <li>Analyze market share by segment</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flow Section -->
+  <section id="flow">
+        <div class="container">
+      <div class="label">The Process</div>
+      <h2>The Simulation Flow</h2>
+
+      <div class="flowchart">
+        <div class="flow-box">
+          <div class="flow-box-header">
+            <div class="flow-box-number">1</div>
+            <h4>Form Teams</h4>
+          </div>
+          <p>CEO, CFO, COO, CMO, HR Lead. Assign roles and align on strategy.</p>
+        </div>
+
+        <div class="flow-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+
+        <div class="flow-box">
+          <div class="flow-box-header">
+            <div class="flow-box-number">2</div>
+            <h4>Decide</h4>
+          </div>
+          <p>Products, pricing, hiring, investment, financing decisions each round.</p>
+        </div>
+
+        <div class="flow-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+
+        <div class="flow-box">
+          <div class="flow-box-header">
+            <div class="flow-box-number">3</div>
+            <h4>Simulate</h4>
+          </div>
+          <p>Market responds. Revenue, profit, market share calculated.</p>
+        </div>
+
+        <div class="flow-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+
+        <div class="flow-box">
+          <div class="flow-box-header">
+            <div class="flow-box-number">4</div>
+            <h4>Adapt</h4>
+          </div>
+          <p>Review results. Refine strategy. Outcompete rivals.</p>
+        </div>
+      </div>
+
+      <div class="flow-repeat">
+        <div class="flow-repeat-line"></div>
+        <div class="flow-repeat-text">Repeat for 6-8 Rounds</div>
+        <div class="flow-repeat-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo Section -->
+  <section class="demo-section" id="demo">
+        <div class="container">
+      <div class="demo-header">
+        <div class="label">Interactive Demo</div>
+        <h2>Experience the Simulation</h2>
+        <p style="margin: 0 auto;">Click through the modules to explore how teams make decisions across all business functions.</p>
+      </div>
+
+      <div class="demo-browser">
+        <div class="demo-chrome">
+          <div class="preview-dot red"></div>
+          <div class="preview-dot yellow"></div>
+          <div class="preview-dot green"></div>
+          <div class="demo-url-bar">flexlabs.me/game/simulation-2024</div>
+        </div>
+
+        <div class="demo-layout">
+          <div class="demo-sidebar">
+            <div class="demo-sidebar-header">
+              <div class="demo-game-name">Business Simulation 2024</div>
+              <div class="demo-team-info">
+                <div class="demo-team-dot"></div>
+                Team Alpha
+              </div>
+              <div class="demo-status-row">
+                <span class="demo-badge green">IN PROGRESS</span>
+                <span class="demo-round">Round 3/8</span>
+              </div>
+              <div class="demo-status-row">
+                <span class="demo-badge blue">Standard</span>
+              </div>
+            </div>
+
+            <nav class="demo-nav">
+              <div class="demo-nav-item active" data-page="overview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Overview
+              </div>
+              <div class="demo-nav-item" data-page="factory">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7-6H4a2 2 0 0 0-2 2v16z"/><path d="M17 2v6h6"/></svg>
+                Factory
+              </div>
+              <div class="demo-nav-item" data-page="finance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Finance
+              </div>
+              <div class="demo-nav-item" data-page="hr">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                HR
+              </div>
+              <div class="demo-nav-item" data-page="marketing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Marketing
+              </div>
+              <div class="demo-nav-item" data-page="rnd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                R&D
+              </div>
+              <div class="demo-nav-item" data-page="results">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Results
+              </div>
+            </nav>
+          </div>
+
+          <div class="demo-main">
+            <!-- Overview Page -->
+            <div class="demo-page active" id="page-overview">
+              <div class="demo-page-header">
+                <h2>Company Overview</h2>
+                <p>Round 3 Performance Summary</p>
+              </div>
+
+              <div class="demo-stats-grid">
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Cash Balance</div>
+                  <div class="demo-stat-value green">$245.8M</div>
+                  <div class="demo-stat-change positive">+12.4% from last round</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Revenue</div>
+                  <div class="demo-stat-value blue">$89.2M</div>
+                  <div class="demo-stat-change positive">+8.7% from last round</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Net Income</div>
+                  <div class="demo-stat-value green">$14.6M</div>
+                  <div class="demo-stat-change positive">+15.2% from last round</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Market Share</div>
+                  <div class="demo-stat-value purple">18.4%</div>
+                  <div class="demo-stat-change positive">+2.1% from last round</div>
+                </div>
+              </div>
+
+              <div class="demo-grid-2">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span class="demo-card-title">Workforce Status</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Total Employees</span>
+                    <span>847</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Workers</span>
+                    <span>680</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Engineers</span>
+                    <span>142</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Supervisors</span>
+                    <span>25</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Average Morale</span>
+                    <span style="color: #22c55e;">78%</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span class="demo-card-title">Production Status</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Factory Efficiency</span>
+                    <span style="color: #22c55e;">82%</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Production Capacity</span>
+                    <span>125,000 units</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Utilization Rate</span>
+                    <span>76%</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Defect Rate</span>
+                    <span style="color: #f59e0b;">3.2%</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>ESG Score</span>
+                    <span style="color: #22c55e;">B+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Factory Page -->
+            <div class="demo-page" id="page-factory">
+              <div class="demo-page-header">
+                <h2>Factory Operations</h2>
+                <p>Manage production, efficiency, and supply chain</p>
+              </div>
+
+              <div class="demo-tabs" data-page="factory">
+                <div class="demo-tab active" data-subtab="overview">Overview</div>
+                <div class="demo-tab" data-subtab="production">Production</div>
+                <div class="demo-tab" data-subtab="logistics">Logistics</div>
+                <div class="demo-tab" data-subtab="materials">Materials</div>
+              </div>
+
+              <!-- Factory Overview Subtab -->
+              <div class="demo-subtab-content active" data-subtab-content="factory-overview">
+                <div class="demo-stats-grid">
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Efficiency</div>
+                    <div class="demo-stat-value green">82%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Capacity</div>
+                    <div class="demo-stat-value blue">125K</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Defect Rate</div>
+                    <div class="demo-stat-value orange">3.2%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">CO2 Emissions</div>
+                    <div class="demo-stat-value">420t</div>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                    <span class="demo-card-title">Efficiency Investment</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Workers</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 45%;"></div></div>
+                    <span class="demo-slider-value">$2.25M</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Machinery</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 60%;"></div></div>
+                    <span class="demo-slider-value">$3.00M</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Engineers</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 30%;"></div></div>
+                    <span class="demo-slider-value">$1.50M</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Factory Production Subtab -->
+              <div class="demo-subtab-content" data-subtab-content="factory-production">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+                    <span class="demo-card-title">Production Lines</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Budget Segment</span>
+                    <span>35,000 units/round</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>General Segment</span>
+                    <span>45,000 units/round</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Enthusiast Segment</span>
+                    <span>25,000 units/round</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Professional Segment</span>
+                    <span>20,000 units/round</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+                    <span class="demo-card-title">Factory Upgrades</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Six Sigma Quality</span>
+                    <span style="color: #22c55e;">Installed</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Full Automation</span>
+                    <span style="color: #888;">$75M</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Green Energy</span>
+                    <span style="color: #888;">$50M</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Advanced Robotics</span>
+                    <span style="color: #888;">$100M</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Factory Logistics Subtab -->
+              <div class="demo-subtab-content" data-subtab-content="factory-logistics">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 18H3a2 2 0 01-2-2V8l3-5h14l3 5v8a2 2 0 01-2 2h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                    <span class="demo-card-title">Shipping Methods</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Sea Freight</span>
+                    <span>$0.50/unit • 14 days</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Air Freight</span>
+                    <span>$2.80/unit • 2 days</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Land Transport</span>
+                    <span>$1.20/unit • 5 days</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Rail Freight</span>
+                    <span>$0.85/unit • 8 days</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+                    <span class="demo-card-title">Regional Routes</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Asia → North America</span>
+                    <span style="color: #22c55e;">Active</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Europe → North America</span>
+                    <span style="color: #22c55e;">Active</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Asia → Europe</span>
+                    <span style="color: #888;">Inactive</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Factory Materials Subtab -->
+              <div class="demo-subtab-content" data-subtab-content="factory-materials">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                    <span class="demo-card-title">Material Inventory</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Display Panels</span>
+                    <span>12,500 units</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Processors</span>
+                    <span>18,200 units</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Memory Chips</span>
+                    <span>25,000 units</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Battery Cells</span>
+                    <span>15,800 units</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Chassis</span>
+                    <span>22,400 units</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="demo-card-title">Suppliers</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>TechParts Asia</span>
+                    <span style="color: #22c55e;">Premium</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>EuroComponents</span>
+                    <span style="color: #3b82f6;">Standard</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>GlobalSupply Inc</span>
+                    <span style="color: #f59e0b;">Budget</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Finance Page -->
+            <div class="demo-page" id="page-finance">
+              <div class="demo-page-header">
+                <h2>Finance & Treasury</h2>
+                <p>Manage capital structure, funding, and financial health</p>
+              </div>
+
+              <div class="demo-tabs" data-page="finance">
+                <div class="demo-tab active" data-subtab="overview">Overview</div>
+                <div class="demo-tab" data-subtab="statements">Statements</div>
+                <div class="demo-tab" data-subtab="funding">Funding</div>
+                <div class="demo-tab" data-subtab="fx">FX</div>
+                <div class="demo-tab" data-subtab="board">Board</div>
+              </div>
+
+              <!-- Finance Overview -->
+              <div class="demo-subtab-content active" data-subtab-content="finance-overview">
+                <div class="demo-stats-grid">
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Cash Balance</div>
+                    <div class="demo-stat-value green">$245.8M</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Revenue</div>
+                    <div class="demo-stat-value blue">$89.2M</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Net Income</div>
+                    <div class="demo-stat-value green">$14.6M</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">EPS</div>
+                    <div class="demo-stat-value purple">$2.43</div>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span class="demo-card-title">Financial Ratios</span>
+                  </div>
+                  <div class="demo-list-item"><span>Current Ratio</span><span style="color: #22c55e;">2.4x</span></div>
+                  <div class="demo-list-item"><span>Quick Ratio</span><span style="color: #22c55e;">1.8x</span></div>
+                  <div class="demo-list-item"><span>Debt to Equity</span><span style="color: #f59e0b;">0.45x</span></div>
+                  <div class="demo-list-item"><span>Profit Margin</span><span style="color: #22c55e;">16.4%</span></div>
+                </div>
+              </div>
+
+              <!-- Finance Statements -->
+              <div class="demo-subtab-content" data-subtab-content="finance-statements">
+                <div class="demo-grid-2">
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+                      <span class="demo-card-title">Income Statement</span>
+                    </div>
+                    <div class="demo-list-item"><span>Revenue</span><span>$89.2M</span></div>
+                    <div class="demo-list-item"><span>Cost of Goods Sold</span><span>($52.1M)</span></div>
+                    <div class="demo-list-item"><span>Gross Profit</span><span>$37.1M</span></div>
+                    <div class="demo-list-item"><span>Operating Expenses</span><span>($18.5M)</span></div>
+                    <div class="demo-list-item"><span>Net Income</span><span style="color: #22c55e;">$14.6M</span></div>
+                  </div>
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/></svg>
+                      <span class="demo-card-title">Balance Sheet</span>
+                    </div>
+                    <div class="demo-list-item"><span>Total Assets</span><span>$425.6M</span></div>
+                    <div class="demo-list-item"><span>Total Liabilities</span><span>$142.8M</span></div>
+                    <div class="demo-list-item"><span>Shareholders' Equity</span><span>$282.8M</span></div>
+                    <div class="demo-list-item"><span>Retained Earnings</span><span>$98.4M</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Finance Funding -->
+              <div class="demo-subtab-content" data-subtab-content="finance-funding">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span class="demo-card-title">Raise Capital</span>
+                  </div>
+                  <div class="demo-list-item"><span>Bank Loan (5yr)</span><span>6.5% APR • Up to $100M</span></div>
+                  <div class="demo-list-item"><span>Corporate Bond (10yr)</span><span>5.2% Yield • Up to $200M</span></div>
+                  <div class="demo-list-item"><span>Equity Issue</span><span>$45.20/share • Dilution risk</span></div>
+                  <div class="demo-list-item"><span>Credit Line</span><span>7.8% APR • $50M Available</span></div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>
+                    <span class="demo-card-title">Current Debt</span>
+                  </div>
+                  <div class="demo-list-item"><span>Senior Loan (2026)</span><span>$45M @ 5.8%</span></div>
+                  <div class="demo-list-item"><span>Bond Series A (2028)</span><span>$80M @ 4.9%</span></div>
+                  <div class="demo-list-item"><span>Total Debt Service</span><span style="color: #f59e0b;">$8.2M/year</span></div>
+                </div>
+              </div>
+
+              <!-- Finance FX -->
+              <div class="demo-subtab-content" data-subtab-content="finance-fx">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+                    <span class="demo-card-title">Foreign Exchange Exposure</span>
+                  </div>
+                  <div class="demo-list-item"><span>EUR/USD</span><span>$24.5M exposed</span></div>
+                  <div class="demo-list-item"><span>JPY/USD</span><span>$18.2M exposed</span></div>
+                  <div class="demo-list-item"><span>GBP/USD</span><span>$12.8M exposed</span></div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="demo-card-title">Hedging Instruments</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">EUR Hedge %</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 60%;"></div></div>
+                    <span class="demo-slider-value">60%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">JPY Hedge %</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 40%;"></div></div>
+                    <span class="demo-slider-value">40%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Finance Board -->
+              <div class="demo-subtab-content" data-subtab-content="finance-board">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span class="demo-card-title">Board Proposals</span>
+                  </div>
+                  <div class="demo-list-item"><span>Dividend Declaration</span><span style="color: #22c55e;">$0.45/share</span></div>
+                  <div class="demo-list-item"><span>Share Buyback</span><span>$15M authorized</span></div>
+                  <div class="demo-list-item"><span>Capital Expenditure</span><span>$28M approved</span></div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span class="demo-card-title">Shareholder Returns</span>
+                  </div>
+                  <div class="demo-list-item"><span>Dividend Yield</span><span>1.8%</span></div>
+                  <div class="demo-list-item"><span>Payout Ratio</span><span>32%</span></div>
+                  <div class="demo-list-item"><span>Total Shareholder Return</span><span style="color: #22c55e;">+24.5% YTD</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HR Page -->
+            <div class="demo-page" id="page-hr">
+              <div class="demo-page-header">
+                <h2>Human Resources</h2>
+                <p>Manage workforce, training, compensation, and benefits</p>
+              </div>
+
+              <div class="demo-tabs" data-page="hr">
+                <div class="demo-tab active" data-subtab="overview">Overview</div>
+                <div class="demo-tab" data-subtab="recruitment">Recruitment</div>
+                <div class="demo-tab" data-subtab="training">Training</div>
+                <div class="demo-tab" data-subtab="benefits">Benefits</div>
+              </div>
+
+              <!-- HR Overview -->
+              <div class="demo-subtab-content active" data-subtab-content="hr-overview">
+                <div class="demo-stats-grid">
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Total Headcount</div>
+                    <div class="demo-stat-value blue">847</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Avg Morale</div>
+                    <div class="demo-stat-value green">78%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Productivity</div>
+                    <div class="demo-stat-value green">85%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Turnover Rate</div>
+                    <div class="demo-stat-value orange">4.2%</div>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span class="demo-card-title">Workforce Composition</span>
+                  </div>
+                  <div class="demo-list-item"><span>Workers</span><span>680</span></div>
+                  <div class="demo-list-item"><span>Engineers</span><span>142</span></div>
+                  <div class="demo-list-item"><span>Supervisors</span><span>25</span></div>
+                </div>
+              </div>
+
+              <!-- HR Recruitment -->
+              <div class="demo-subtab-content" data-subtab-content="hr-recruitment">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span class="demo-card-title">Recruitment Tiers</span>
+                  </div>
+                  <div class="demo-list-item"><span>Basic Recruitment</span><span>$500/hire • Avg quality</span></div>
+                  <div class="demo-list-item"><span>Premium Recruitment</span><span>$2,000/hire • High quality</span></div>
+                  <div class="demo-list-item"><span>Executive Search</span><span>$10,000/hire • Top talent</span></div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                    <span class="demo-card-title">Hire This Round</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Workers</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 50%;"></div></div>
+                    <span class="demo-slider-value">25</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Engineers</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 30%;"></div></div>
+                    <span class="demo-slider-value">8</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Supervisors</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 10%;"></div></div>
+                    <span class="demo-slider-value">2</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HR Training -->
+              <div class="demo-subtab-content" data-subtab-content="hr-training">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span class="demo-card-title">Training Programs</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Technical Skills</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 70%;"></div></div>
+                    <span class="demo-slider-value">70%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Leadership</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 45%;"></div></div>
+                    <span class="demo-slider-value">45%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Safety</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 85%;"></div></div>
+                    <span class="demo-slider-value">85%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Quality Control</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 55%;"></div></div>
+                    <span class="demo-slider-value">55%</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span class="demo-card-title">Workforce Fatigue</span>
+                  </div>
+                  <div class="demo-list-item"><span>Current Fatigue Level</span><span style="color: #f59e0b;">32%</span></div>
+                  <div class="demo-list-item"><span>Training Load Impact</span><span>+8%</span></div>
+                  <div class="demo-list-item"><span>Recovery Rate</span><span>-15%/round</span></div>
+                </div>
+              </div>
+
+              <!-- HR Benefits -->
+              <div class="demo-subtab-content" data-subtab-content="hr-benefits">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="demo-card-title">Benefits Package</span>
+                  </div>
+                  <div class="demo-list-item"><span>Health Insurance</span><span style="color: #22c55e;">Premium Plan</span></div>
+                  <div class="demo-list-item"><span>Retirement (401k Match)</span><span>6%</span></div>
+                  <div class="demo-list-item"><span>Paid Time Off</span><span>20 days</span></div>
+                  <div class="demo-list-item"><span>Parental Leave</span><span>12 weeks</span></div>
+                  <div class="demo-list-item"><span>Stock Options</span><span style="color: #22c55e;">Enabled</span></div>
+                  <div class="demo-list-item"><span>Flexible Work</span><span style="color: #22c55e;">Hybrid</span></div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span class="demo-card-title">Benefits Cost</span>
+                  </div>
+                  <div class="demo-list-item"><span>Total Benefits Cost</span><span>$4.2M/round</span></div>
+                  <div class="demo-list-item"><span>Cost per Employee</span><span>$4,960</span></div>
+                  <div class="demo-list-item"><span>Morale Impact</span><span style="color: #22c55e;">+12%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Marketing Page -->
+            <div class="demo-page" id="page-marketing">
+              <div class="demo-page-header">
+                <h2>Marketing & Sales</h2>
+                <p>Manage brand, advertising, and market positioning</p>
+              </div>
+
+              <div class="demo-tabs" data-page="marketing">
+                <div class="demo-tab active" data-subtab="overview">Overview</div>
+                <div class="demo-tab" data-subtab="advertising">Advertising</div>
+                <div class="demo-tab" data-subtab="segments">Segments</div>
+                <div class="demo-tab" data-subtab="promotions">Promotions</div>
+              </div>
+
+              <!-- Marketing Overview -->
+              <div class="demo-subtab-content active" data-subtab-content="marketing-overview">
+                <div class="demo-stats-grid">
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Brand Value</div>
+                    <div class="demo-stat-value purple">68%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Brand Awareness</div>
+                    <div class="demo-stat-value blue">54%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Market Share</div>
+                    <div class="demo-stat-value green">18.4%</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Customer Sat.</div>
+                    <div class="demo-stat-value green">82%</div>
+                  </div>
+                </div>
+                <div class="demo-grid-2">
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                      <span class="demo-card-title">Performance Metrics</span>
+                    </div>
+                    <div class="demo-list-item"><span>Total Ad Spend</span><span>$7.25M</span></div>
+                    <div class="demo-list-item"><span>Customer Acquisition Cost</span><span>$42.50</span></div>
+                    <div class="demo-list-item"><span>Conversion Rate</span><span style="color: #22c55e;">4.2%</span></div>
+                    <div class="demo-list-item"><span>Return on Ad Spend</span><span style="color: #22c55e;">3.2x</span></div>
+                  </div>
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+                      <span class="demo-card-title">Brand Health</span>
+                    </div>
+                    <div class="demo-list-item"><span>Net Promoter Score</span><span style="color: #22c55e;">+42</span></div>
+                    <div class="demo-list-item"><span>Brand Recall</span><span>67%</span></div>
+                    <div class="demo-list-item"><span>Purchase Intent</span><span>38%</span></div>
+                    <div class="demo-list-item"><span>Loyalty Rate</span><span style="color: #22c55e;">72%</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Marketing Advertising -->
+              <div class="demo-subtab-content" data-subtab-content="marketing-advertising">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                    <span class="demo-card-title">Advertising Channels</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Television</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 35%;"></div></div>
+                    <span class="demo-slider-value">$1.75M</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Digital Ads</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 55%;"></div></div>
+                    <span class="demo-slider-value">$2.75M</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Social Media</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 40%;"></div></div>
+                    <span class="demo-slider-value">$2.00M</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Print Media</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 15%;"></div></div>
+                    <span class="demo-slider-value">$0.75M</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                    <span class="demo-card-title">Channel Effectiveness</span>
+                  </div>
+                  <div class="demo-list-item"><span>Television ROI</span><span style="color: #22c55e;">2.8x</span></div>
+                  <div class="demo-list-item"><span>Digital Ads ROI</span><span style="color: #22c55e;">4.2x</span></div>
+                  <div class="demo-list-item"><span>Social Media ROI</span><span style="color: #22c55e;">3.6x</span></div>
+                  <div class="demo-list-item"><span>Print Media ROI</span><span style="color: #f59e0b;">1.4x</span></div>
+                </div>
+              </div>
+
+              <!-- Marketing Segments -->
+              <div class="demo-subtab-content" data-subtab-content="marketing-segments">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l4.5 4.5"/></svg>
+                    <span class="demo-card-title">Market Segments</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Budget Consumers</span>
+                    <span>15.2% share • Price-sensitive</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>General Market</span>
+                    <span>22.8% share • Balanced needs</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Enthusiasts</span>
+                    <span>18.6% share • Performance-focused</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Professional</span>
+                    <span>12.4% share • Premium features</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Active Lifestyle</span>
+                    <span>21.0% share • Durability-focused</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    <span class="demo-card-title">Segment Targeting</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Budget Focus</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 30%;"></div></div>
+                    <span class="demo-slider-value">30%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">General Focus</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 45%;"></div></div>
+                    <span class="demo-slider-value">45%</span>
+                  </div>
+                  <div class="demo-slider-row">
+                    <span class="demo-slider-label">Premium Focus</span>
+                    <div class="demo-slider"><div class="demo-slider-fill" style="width: 25%;"></div></div>
+                    <span class="demo-slider-value">25%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Marketing Promotions -->
+              <div class="demo-subtab-content" data-subtab-content="marketing-promotions">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <span class="demo-card-title">Active Promotions</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Flash Sale (20% off)</span>
+                    <span style="color: #22c55e;">Active • +15% sales</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Bundle Deal</span>
+                    <span style="color: #22c55e;">Active • +22% AOV</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Loyalty Rewards (2x Points)</span>
+                    <span style="color: #3b82f6;">Scheduled</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Trade-in Program</span>
+                    <span style="color: #a855f7;">Planning</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    <span class="demo-card-title">Promotion Budget</span>
+                  </div>
+                  <div class="demo-list-item"><span>Total Budget</span><span>$2.5M</span></div>
+                  <div class="demo-list-item"><span>Spent This Round</span><span>$1.2M</span></div>
+                  <div class="demo-list-item"><span>Projected ROI</span><span style="color: #22c55e;">2.8x</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- R&D Page -->
+            <div class="demo-page" id="page-rnd">
+              <div class="demo-page-header">
+                <h2>Research & Development</h2>
+                <p>Develop products and invest in technology</p>
+              </div>
+
+              <div class="demo-tabs" data-page="rnd">
+                <div class="demo-tab active" data-subtab="overview">Overview</div>
+                <div class="demo-tab" data-subtab="products">Products</div>
+                <div class="demo-tab" data-subtab="technology">Technology</div>
+                <div class="demo-tab" data-subtab="patents">Patents</div>
+              </div>
+
+              <!-- R&D Overview -->
+              <div class="demo-subtab-content active" data-subtab-content="rnd-overview">
+                <div class="demo-stats-grid">
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">R&D Budget</div>
+                    <div class="demo-stat-value blue">$12.5M</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Active Projects</div>
+                    <div class="demo-stat-value green">3</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Patents</div>
+                    <div class="demo-stat-value purple">7</div>
+                  </div>
+                  <div class="demo-stat-card">
+                    <div class="demo-stat-label">Tech Level</div>
+                    <div class="demo-stat-value orange">2</div>
+                  </div>
+                </div>
+                <div class="demo-grid-2">
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                      <span class="demo-card-title">Innovation Metrics</span>
+                    </div>
+                    <div class="demo-list-item"><span>R&D Efficiency</span><span style="color: #22c55e;">87%</span></div>
+                    <div class="demo-list-item"><span>Time-to-Market</span><span>3.2 rounds avg</span></div>
+                    <div class="demo-list-item"><span>Success Rate</span><span style="color: #22c55e;">78%</span></div>
+                  </div>
+                  <div class="demo-card">
+                    <div class="demo-card-header">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      <span class="demo-card-title">Research Pipeline</span>
+                    </div>
+                    <div class="demo-list-item"><span>In Concept</span><span>2 projects</span></div>
+                    <div class="demo-list-item"><span>In Development</span><span>3 projects</span></div>
+                    <div class="demo-list-item"><span>Ready to Launch</span><span style="color: #22c55e;">1 project</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- R&D Products -->
+              <div class="demo-subtab-content" data-subtab-content="rnd-products">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span class="demo-card-title">Products in Development</span>
+                  </div>
+                  <div class="demo-list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                      <span>Nova Pro (Professional)</span>
+                      <span style="color: #f59e0b;">65%</span>
+                    </div>
+                    <div class="demo-progress" style="width: 100%;"><div class="demo-progress-fill" style="width: 65%;"></div></div>
+                  </div>
+                  <div class="demo-list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                      <span>Spark SE (Budget)</span>
+                      <span style="color: #22c55e;">90%</span>
+                    </div>
+                    <div class="demo-progress" style="width: 100%;"><div class="demo-progress-fill" style="width: 90%;"></div></div>
+                  </div>
+                  <div class="demo-list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                      <span>Titan X (Enthusiast)</span>
+                      <span style="color: #ef4444;">25%</span>
+                    </div>
+                    <div class="demo-progress" style="width: 100%;"><div class="demo-progress-fill" style="width: 25%; background: linear-gradient(to right, #f59e0b, #ef4444);"></div></div>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span class="demo-card-title">Product Specifications</span>
+                  </div>
+                  <div class="demo-list-item"><span>Design Quality</span><span style="color: #22c55e;">+15% appeal</span></div>
+                  <div class="demo-list-item"><span>Performance Rating</span><span style="color: #22c55e;">A+</span></div>
+                  <div class="demo-list-item"><span>Feature Set</span><span>Premium</span></div>
+                  <div class="demo-list-item"><span>Target Price Point</span><span>$899</span></div>
+                </div>
+              </div>
+
+              <!-- R&D Technology -->
+              <div class="demo-subtab-content" data-subtab-content="rnd-technology">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/></svg>
+                    <span class="demo-card-title">Technology Upgrades</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Miniaturization Tech</span>
+                    <span style="color: #22c55e;">Researched</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Advanced Battery</span>
+                    <span style="color: #22c55e;">Researched</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Next-Gen Display</span>
+                    <span>$40M • 2 rounds</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>AI Integration</span>
+                    <span>$50M • Requires Tech 2</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Quantum Processing</span>
+                    <span>$80M • Requires Tech 3</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                    <span class="demo-card-title">Tech Benefits</span>
+                  </div>
+                  <div class="demo-list-item"><span>Production Efficiency</span><span style="color: #22c55e;">+12%</span></div>
+                  <div class="demo-list-item"><span>Product Quality</span><span style="color: #22c55e;">+18%</span></div>
+                  <div class="demo-list-item"><span>Manufacturing Cost</span><span style="color: #22c55e;">-8%</span></div>
+                </div>
+              </div>
+
+              <!-- R&D Patents -->
+              <div class="demo-subtab-content" data-subtab-content="rnd-patents">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span class="demo-card-title">Patent Portfolio</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Display Technology Patent</span>
+                    <span style="color: #22c55e;">Active • +5% margin</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Battery Efficiency Patent</span>
+                    <span style="color: #22c55e;">Active • +3% margin</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>UI/UX Design Patent</span>
+                    <span style="color: #22c55e;">Active • +8% appeal</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Miniaturization Patent</span>
+                    <span style="color: #22c55e;">Active • -4% cost</span>
+                  </div>
+                  <div class="demo-list-item">
+                    <span>Wireless Tech Patent</span>
+                    <span style="color: #3b82f6;">Pending</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="demo-card-title">IP Protection</span>
+                  </div>
+                  <div class="demo-list-item"><span>Total Patents</span><span>7</span></div>
+                  <div class="demo-list-item"><span>Patents Pending</span><span>2</span></div>
+                  <div class="demo-list-item"><span>Licensing Revenue</span><span style="color: #22c55e;">$2.4M/round</span></div>
+                  <div class="demo-list-item"><span>Legal Defense Budget</span><span>$1.5M</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results Page -->
+            <div class="demo-page" id="page-results">
+              <div class="demo-page-header">
+                <h2>Round Results</h2>
+                <p>Performance summary and rankings</p>
+              </div>
+
+              <div class="demo-stats-grid">
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Overall Rank</div>
+                  <div class="demo-stat-value green">#2</div>
+                  <div class="demo-stat-change positive">Up from #3</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Revenue Rank</div>
+                  <div class="demo-stat-value blue">#1</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Profit Rank</div>
+                  <div class="demo-stat-value green">#2</div>
+                </div>
+                <div class="demo-stat-card">
+                  <div class="demo-stat-label">Market Share Rank</div>
+                  <div class="demo-stat-value purple">#3</div>
+                </div>
+              </div>
+
+              <div class="demo-card">
+                <div class="demo-card-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                  <span class="demo-card-title">Leaderboard</span>
+                </div>
+                <div class="demo-list-item">
+                  <span style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #f59e0b; font-weight: 600;">1.</span>
+                    <span style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%;"></span>
+                    Team Gamma
+                  </span>
+                  <span style="color: #22c55e;">$98.4M</span>
+                </div>
+                <div class="demo-list-item" style="background: rgba(0, 255, 0, 0.05); margin: 0 -20px; padding: 12px 20px;">
+                  <span style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #c0c0c0; font-weight: 600;">2.</span>
+                    <span style="width: 10px; height: 10px; background: #3b82f6; border-radius: 50%;"></span>
+                    Team Alpha (You)
+                  </span>
+                  <span style="color: #22c55e;">$89.2M</span>
+                </div>
+                <div class="demo-list-item">
+                  <span style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #cd7f32; font-weight: 600;">3.</span>
+                    <span style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></span>
+                    Team Beta
+                  </span>
+                  <span style="color: #22c55e;">$76.8M</span>
+                </div>
+                <div class="demo-list-item">
+                  <span style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #888; font-weight: 600;">4.</span>
+                    <span style="width: 10px; height: 10px; background: #a855f7; border-radius: 50%;"></span>
+                    Team Delta
+                  </span>
+                  <span>$65.1M</span>
+                </div>
+              </div>
+
+              <div class="demo-card">
+                <div class="demo-card-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                  <span class="demo-card-title">Performance Trend</span>
+                </div>
+                <div style="display: flex; gap: 4px; height: 80px; align-items: flex-end; padding-top: 16px;">
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 100%; background: var(--green); height: 30px; border-radius: 2px;"></div>
+                    <span style="font-size: 11px; color: #888;">R1</span>
+                  </div>
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 100%; background: var(--green); height: 45px; border-radius: 2px;"></div>
+                    <span style="font-size: 11px; color: #888;">R2</span>
+                  </div>
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 100%; background: var(--green); height: 60px; border-radius: 2px;"></div>
+                    <span style="font-size: 11px; color: #888;">R3</span>
+                  </div>
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="width: 100%; background: var(--dark-border); height: 40px; border-radius: 2px; border: 1px dashed #444;"></div>
+                    <span style="font-size: 11px; color: #888;">R4</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-ticker">
+            <span class="demo-ticker-label">Breaking</span>
+            <span class="demo-ticker-text">Port Congestion Disrupts Global Supply Chains - Major shipping delays at Asian ports cause component shortages</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Differentiators Section -->
+  <section id="differentiators">
+        <div class="container">
+      <div class="label">Differentiators</div>
+      <h2>Not Another Business Game</h2>
+
+      <div class="diff-items">
+        <div class="diff-item">
+          <div class="diff-number">01</div>
+          <div class="diff-content">
+            <h3>Built for Capability, Not Scores</h3>
+            <div class="diff-points">
+              <span class="diff-point">Strategic thinking</span>
+              <span class="diff-point">Financial judgment</span>
+              <span class="diff-point">Cross-functional collaboration</span>
+              <span class="diff-point">Leadership under pressure</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-item">
+          <div class="diff-number">02</div>
+          <div class="diff-content">
+            <h3>AI-Powered Insights</h3>
+            <div class="diff-points">
+              <span class="diff-point">What worked and why</span>
+              <span class="diff-point">Where alignment broke down</span>
+              <span class="diff-point">Team comparisons</span>
+              <span class="diff-point">Executive-ready summaries</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-item">
+          <div class="diff-number">03</div>
+          <div class="diff-content">
+            <h3>Consulting-Grade Realism</h3>
+            <div class="diff-points">
+              <span class="diff-point">R&D assets amortize</span>
+              <span class="diff-point">Talent affects productivity</span>
+              <span class="diff-point">Short-term wins can hurt long-term</span>
+              <span class="diff-point">No gaming the system</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section id="comparison">
+        <div class="container">
+      <div class="label">Competitive Edge</div>
+      <h2>How Flex Labs Compares</h2>
+
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>Capsim</th>
+            <th>Traditional BSGs</th>
+            <th>Flex Labs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Modern UI</td>
+            <td class="partial">Partial</td>
+            <td class="no">No</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td>AI-generated insights</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td>Fully integrated system</td>
+            <td class="partial">Partial</td>
+            <td class="partial">Partial</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td>Capability-building focus</td>
+            <td class="partial">Partial</td>
+            <td class="no">No</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td>Customizable logic</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td>Enterprise-ready</td>
+            <td class="partial">Partial</td>
+            <td class="no">No</td>
+            <td class="check">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="gap-tagline">"Built for developing leaders - not delivering coursework."</p>
+    </div>
+  </section>
+
+  <!-- Audience Section -->
+  <section id="audience">
+        <div class="container">
+      <div class="label">Designed For</div>
+      <h2>Universities & Business Schools</h2>
+
+      <div class="audience-benefits">
+        <div class="audience-benefit">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Bridge Theory & Practice</h4>
+            <p>Connect classroom concepts to real-world business decisions</p>
+          </div>
+        </div>
+        <div class="audience-benefit">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Data for Grading & Research</h4>
+            <p>Generate analytics for assessment and academic research</p>
+          </div>
+        </div>
+        <div class="audience-benefit">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="benefit-text">
+            <h4>Engagement Through Competition</h4>
+            <p>Increase student motivation with team-based competitive gameplay</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curriculum Mapping Section -->
+  <section id="curriculum-mapping">
+        <div class="container">
+      <div class="label">AUC Business Core Alignment</div>
+      <h2>Direct Mapping to Your Curriculum</h2>
+
+      <div class="curriculum-table-container">
+        <table class="curriculum-mapping-table">
+          <thead>
+            <tr>
+              <th>Simulation Function</th>
+              <th>AUC Modules</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Strategy & Leadership</td>
+              <td>BADM 203/2001 Introduction to Business, BADM 480/4001 Business Planning & Strategy (Capstone)</td>
+            </tr>
+            <tr>
+              <td>Finance & Capital Structure</td>
+              <td>FINC 303/2101 Business Finance I</td>
+            </tr>
+            <tr>
+              <td>Human Resources</td>
+              <td>MGMT 404/4202 Managing the Human Capital</td>
+            </tr>
+            <tr>
+              <td>Research & Innovation</td>
+              <td>ENTR 413/4102 Entrepreneurship & Innovation, ENTR 000/4503 Digital Strategy</td>
+            </tr>
+            <tr>
+              <td>Production & Supply Chain</td>
+              <td>OPMG 310/3201 Operations for Competitive Advantage, OPMG 401/4301 Supply Chain Management</td>
+            </tr>
+            <tr>
+              <td>Marketing & Pricing</td>
+              <td>MKTG 302/2101 Principles of Marketing, MKTG 405/3201 Marketing Research</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="curriculum-footer">Students are not simulating abstract roles - they are applying the same functional logic taught in these modules within one integrated operating system</p>
+    </div>
+  </section>
+
+  <!-- Delivery Section -->
+  <section id="delivery">
+        <div class="container">
+      <div class="label">Delivery</div>
+      <h2>Flexible Delivery</h2>
+
+      <div class="delivery-options">
+        <div class="delivery-row">
+          <div>
+            <div class="delivery-name">Flex Labs-Led</div>
+            <div class="delivery-tag">Premium</div>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Approach</div>
+            <p>End-to-end facilitation with expert guidance throughout</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Best For</div>
+            <p>Leadership offsites, first-time users, high-stakes programs</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Support</div>
+            <p>Full facilitation, live coaching, debrief sessions</p>
+          </div>
+        </div>
+
+        <div class="delivery-row">
+          <div>
+            <div class="delivery-name">Hybrid</div>
+            <div class="delivery-tag">Transition</div>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Approach</div>
+            <p>Co-delivery first cycle, then transition to independence</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Best For</div>
+            <p>Scaling organizations, building internal capability</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Support</div>
+            <p>Joint delivery, knowledge transfer, ongoing access</p>
+          </div>
+        </div>
+
+        <div class="delivery-row">
+          <div>
+            <div class="delivery-name">Client-Led</div>
+            <div class="delivery-tag">Scalable</div>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Approach</div>
+            <p>Train-the-facilitator model for internal deployment</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Best For</div>
+            <p>Internal L&D teams, recurring programs, large cohorts</p>
+          </div>
+          <div class="delivery-col">
+            <div class="delivery-col-label">Support</div>
+            <p>Facilitator training, materials, technical support</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deliverables Section -->
+  <section id="deliverables">
+        <div class="container">
+      <div class="label">Deliverables</div>
+      <h2>What You Get</h2>
+
+      <div class="two-col">
+        <div>
+          <h4>The Experience</h4>
+          <ul>
+            <li>Fully hosted platform (no setup)</li>
+            <li>Team-based competitive gameplay</li>
+            <li>Multi-round business scenarios</li>
+          </ul>
+        </div>
+        <div>
+          <h4>The Outputs</h4>
+          <ul>
+            <li>Live dashboards & leaderboards</li>
+            <li>Financial & operational reports</li>
+            <li>AI-generated insights</li>
+            <li>Facilitator analytics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bio Section -->
+  <section id="bio">
+        <div class="container">
+      <div class="label">About</div>
+      <h2>Who We Are</h2>
+
+      <div class="bio-content">
+        <div class="bio-company">
+          <p>Boutique management consulting firm. 10+ years of experience and service. Proven delivery across sovereign wealth funds, government entities, and banks across MENA.</p>
+        </div>
+        <div class="bio-leader">
+          <div class="bio-leader-name">Marwan Basha</div>
+          <div class="bio-leader-title">Founder & Managing Director</div>
+          <ul>
+            <li>10+ years at McKinsey & Company</li>
+            <li>35+ strategy and transformation engagements</li>
+            <li>Designed capability programs for 40-80+ participants</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="bio-tagline">"This simulation is built from lived consulting experience - not academic theory."</p>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section" id="testimonials">
+        <div class="container">
+      <div class="label">What They Say</div>
+      <h2>Corporate Client Testimonials</h2>
+      <p class="testimonials-intro">Feedback from organizations we've helped with capability building</p>
+
+      <div class="testimonials-grid">
+        <div class="testimonial">
+          <div class="testimonial-quote">"I saw how strategy actually plays out in real business scenarios."</div>
+          <div class="testimonial-author">
+            <span class="author-name">Director</span>
+            <span class="author-company">Consulting Firm</span>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-quote">"I learned more in two weeks than in months of traditional training."</div>
+          <div class="testimonial-author">
+            <span class="author-name">Project Manager</span>
+            <span class="author-company">Construction Company</span>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-quote">"I finally understand how my decisions affect the entire business."</div>
+          <div class="testimonial-author">
+            <span class="author-name">Senior Executive</span>
+            <span class="author-company">GCC Government Entity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Close Section -->
+  <section class="close-section" id="close">
+        <div class="container">
+      <h2 class="cta-headline">Ready to Transform Your Learning Experience?</h2>
+      <p class="cta-subtext">Let's discuss how the simulation can work for your organization</p>
+      <a href="mailto:info@flexlabs.me" class="cta-button">Request a Demo</a>
+    </div>
+  </section>
+
+  <script>
+    // Create floating particles
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+    createParticles();
+
+    // Demo navigation
+    const navItems = document.querySelectorAll('.demo-nav-item');
+    const pages = document.querySelectorAll('.demo-page');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+
+        pages.forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + page).classList.add('active');
+      });
+    });
+
+    // Demo subtabs (within each page)
+    document.querySelectorAll('.demo-tabs').forEach(tabsContainer => {
+      const pageId = tabsContainer.getAttribute('data-page');
+      const tabs = tabsContainer.querySelectorAll('.demo-tab');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const subtabId = tab.getAttribute('data-subtab');
+
+          // Remove active from all tabs in this container
+          tabs.forEach(t => t.classList.remove('active'));
+          // Add active to clicked tab
+          tab.classList.add('active');
+
+          // Find the parent demo-page
+          const demoPage = tabsContainer.closest('.demo-page');
+          if (demoPage && subtabId && pageId) {
+            // Hide all subtab content in this page
+            const allSubtabContent = demoPage.querySelectorAll('.demo-subtab-content');
+            allSubtabContent.forEach(content => content.classList.remove('active'));
+
+            // Show the selected subtab content
+            const targetContent = demoPage.querySelector(`[data-subtab-content="${pageId}-${subtabId}"]`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          }
+        });
+      });
+    });
+
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Curriculum card expansion
+    const curriculumGrid = document.getElementById('curriculumGrid');
+    const curriculumCards = document.querySelectorAll('.curriculum-card');
+
+    curriculumCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        // Don't expand if clicking close button
+        if (e.target.closest('.close-btn')) return;
+
+        // If already expanded, do nothing
+        if (card.classList.contains('expanded')) return;
+
+        // Collapse any other expanded card first
+        curriculumCards.forEach(c => c.classList.remove('expanded'));
+
+        // Expand this card
+        curriculumGrid.classList.add('has-expanded');
+        card.classList.add('expanded');
+
+        // Scroll to the card
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      });
+    });
+
+    function collapseCard(e) {
+      e.stopPropagation();
+      curriculumGrid.classList.remove('has-expanded');
+      curriculumCards.forEach(c => c.classList.remove('expanded'));
+    }
+  </script>
+</body>
+</html>
