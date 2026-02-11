@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { NewsTicker } from "./components/NewsTicker";
-import { HeaderBar, ViewId } from "./components/HeaderBar";
-import { ModuleNav, ModuleId } from "./components/ModuleNav";
+import { HeaderBar } from "./components/HeaderBar";
+import type { ViewId } from "./components/HeaderBar";
+import { ModuleNav } from "./components/ModuleNav";
+import type { ModuleId } from "./components/ModuleNav";
 import { StatusBar } from "./components/StatusBar";
 import { FactoryFloor } from "./views/FactoryFloor";
 import { colors } from "./data/colors";
