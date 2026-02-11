@@ -3,6 +3,7 @@ import { NewsTicker } from "./components/NewsTicker";
 import { HeaderBar, ViewId } from "./components/HeaderBar";
 import { ModuleNav, ModuleId } from "./components/ModuleNav";
 import { StatusBar } from "./components/StatusBar";
+import { FactoryFloor } from "./views/FactoryFloor";
 import { colors } from "./data/colors";
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
       <div className="flex-1 flex overflow-hidden">
         {/* Viewport */}
         <div className="flex-1 flex items-center justify-center overflow-auto p-4">
-          <ViewportPlaceholder view={activeView} module={activeModule} />
+          <Viewport view={activeView} module={activeModule} />
         </div>
 
         {/* Right Panel */}
@@ -59,9 +60,19 @@ function App() {
   );
 }
 
-function ViewportPlaceholder({ view, module }: { view: ViewId; module: ModuleId }) {
+function Viewport({ view, module }: { view: ViewId; module: ModuleId }) {
+  // Factory view renders the live factory floor
+  if (view === "factory") {
+    return (
+      <div className="animate-fade-in">
+        <FactoryFloor />
+      </div>
+    );
+  }
+
+  // Other views: placeholders for now
   const viewLabels: Record<ViewId, string> = {
-    factory: "Isometric Factory Floor",
+    factory: "",
     map: "Global Operations Map",
     finance: "Financial Dashboard",
     rd: "R&D Lab & Tech Tree",
@@ -70,28 +81,31 @@ function ViewportPlaceholder({ view, module }: { view: ViewId; module: ModuleId 
     facilitator: "Facilitator War Room",
   };
 
+  const icons: Record<ViewId, string> = {
+    factory: "",
+    map: "🌍",
+    finance: "💰",
+    rd: "🔬",
+    marketing: "📊",
+    results: "🏆",
+    facilitator: "⚙️",
+  };
+
   return (
     <div className="text-center animate-fade-in">
       <div
         className="w-[896px] h-[616px] rounded-lg flex flex-col items-center justify-center gap-4"
         style={{
-          background: view === "factory" ? colors.floorBg : view === "map" ? "#080c14" : colors.bgSurface,
+          background: view === "map" ? "#080c14" : colors.bgSurface,
           border: `1px solid ${colors.border}`,
         }}
       >
-        <div className="text-[40px]">
-          {view === "factory" ? "🏭" : view === "map" ? "🌍" : view === "finance" ? "💰" : view === "rd" ? "🔬" : view === "marketing" ? "📊" : "🏆"}
-        </div>
+        <div className="text-[40px]">{icons[view]}</div>
         <h2 className="text-xl font-bold" style={{ color: colors.textPrimary }}>
           {viewLabels[view]}
         </h2>
-        {view === "factory" && (
-          <p className="text-sm" style={{ color: colors.textMuted }}>
-            Active module: <span style={{ color: colors.accentGold }}>{module.toUpperCase()}</span>
-          </p>
-        )}
         <p className="text-xs" style={{ color: colors.textDim }}>
-          896 × 616 canvas — content coming in next steps
+          Coming soon
         </p>
       </div>
     </div>
